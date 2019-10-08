@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:1.7.2-alpine
+    container_name: traefik
+    restart: unless-stopped
+    #command: -c /dev/null --web --docker --logLevel=DEBUG
+    networks:
+      - web
+      - internal
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      - DO_AUTH_TOKEN=YOUR_DIGITALOCEAN_AUTH_TOKEN
+    labels:
+      - traefik.backend=traefik
+      - traefik.frontend.rule=Host:router.YOUR_DOMAIN.com
+      - traefik.docker.network=web
+      - traefik.port=8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /REPLACE_WITH_PATH_TO_ROUTER_FOLDER/traefik.toml:/traefik.toml
+      - /REPLACE_WITH_PATH_TO_ROUTER_FOLDER/acme.json:/acme.json 
+
+networks:
+  web:
+    external: 
+      name: web
+  internal:
+    external: 
+      name: internal

@@ -1,0 +1,17 @@
+version: '3.4'
+
+networks:
+  web:
+    external:
+      name: web
+services:
+  web:
+    labels:
+      - 'traefik.backend=web'
+      - 'traefik.port=4000'
+      - 'traefik.frontend.rule=Host:storefront.YOUR_DOMAIN.COM'
+      # Uncomment to password protect the storefront
+      # - 'traefik.frontend.auth.basic.removeHeader=true'
+      # - 'traefik.frontend.auth.basic=YOUR_USER:YOUR_ENCRYPTED_PASSWORD'
+    networks:
+      web:

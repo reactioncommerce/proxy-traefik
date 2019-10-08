@@ -1,0 +1,39 @@
+defaultEntryPoints = ["http", "https"]
+
+[entryPoints]
+  [entryPoints.dashboard]
+    address = ":8080"
+    [entryPoints.dashboard.auth]
+      [entryPoints.dashboard.auth.basic]
+        # use htpasswd -n YOU_USERNAME to generate an encrypted password
+        users = ["YOUR_USER:YOUR_ENCRYPTED_PASSWORD"]
+
+[api]
+entrypoint="dashboard"
+
+[entryPoints.http]
+    address = ":80"
+      [entryPoints.http.redirect]
+        entryPoint = "https"
+  [entryPoints.https]
+    address = ":443"
+      [entryPoints.https.tls]
+
+[acme]
+email = "YOUR_EMAIL"
+storage = "acme.json"
+entryPoint = "https"
+onHostRule = true
+[acme.dnsChallenge]
+  # change as needed
+  provider="digitalocean"
+[[acme.domains]]
+  # Generate wildcard. Note that you MUST have a CAA record in your
+  # DNS provider with the following value: 0 issuewild "letsencrypt.org"
+  [[acme.domains]]
+  main = "YOUR_DOMAIN"
+
+[docker]
+domain = "YOUR_DOMAIN"
+watch = true
+network = "web"

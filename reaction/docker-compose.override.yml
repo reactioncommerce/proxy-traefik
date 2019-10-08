@@ -1,0 +1,21 @@
+version: '3.4'
+
+networks:
+  web:
+    external:
+      name: web
+services:
+  reaction:
+    labels:
+      - 'traefik.backend=reaction'
+      - 'traefik.port=3000'
+      - 'traefik.frontend.rule=Host:reaction-api.YOUR_DOMAIN.COM'
+      # Uncomment to password protect the Reaction API
+      # - 'traefik.frontend.auth.basic.removeHeader=true'
+      # - 'traefik.frontend.auth.basic=YOUR_USER:YOUR_ENCRYPTED_PASSWORD'
+    networks:
+      web:
+  mongo:
+    labels:
+      - traefik.enable=false
+
