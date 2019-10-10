@@ -9,7 +9,7 @@ services:
     labels:
       - 'traefik.backend=hydra'
       - 'traefik.port=4444'
-      - 'traefik.frontend.rule=Host:sso.YOUR_DOMAIN.COM'
+      - 'traefik.frontend.rule=Host:hydra.YOUR_DOMAIN.COM'
     networks:
       web:
   hydra-migrate:

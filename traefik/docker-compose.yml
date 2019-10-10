@@ -16,13 +16,13 @@ services:
       - DO_AUTH_TOKEN=YOUR_DIGITALOCEAN_AUTH_TOKEN
     labels:
       - traefik.backend=traefik
-      - traefik.frontend.rule=Host:router.YOUR_DOMAIN.com
+      - traefik.frontend.rule=Host:traefik.YOURDOMAIN.COM
       - traefik.docker.network=web
       - traefik.port=8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /REPLACE_WITH_PATH_TO_ROUTER_FOLDER/traefik.toml:/traefik.toml
-      - /REPLACE_WITH_PATH_TO_ROUTER_FOLDER/acme.json:/acme.json 
+      - /home/your_username/proxy/traefik/traefik.toml:/traefik.toml
+      - /home/will/your_username/traefik/acme.json:/acme.json 
 
 networks:
   web:
