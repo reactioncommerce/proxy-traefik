@@ -160,7 +160,7 @@ cp /home/your_username/proxy/reaction/docker-compose.override.yml /home/your_use
 4. Restart the Reaction service for the updates to take effect.
 
 ```
-docker-compose down && docker-compose up -d && docker-compose logs -f
+docker-compose down && docker-compose up -d
 ```
 
 5. In the Traefik admin there should be a new frontend for `reaction.YOUDOMAIN.COM`
@@ -170,3 +170,43 @@ docker-compose down && docker-compose up -d && docker-compose logs -f
 Repeat steps 1-5 for the `example-storefront` and `reaction-hydra` directories.
 
 In the Traefik admin UI verify a frontend exists for the `example-storefront` and `hydra`
+
+
+##### Configure Environment Variables
+
+Serveral environment variables need to changed to reflect sub-domains for each project.
+
+
+In the `reaction` directory open the `.env` file and substitute the default value of `ROOT_URL` to reflect your sub-domain, i.e. `ROOT_URL=https://reaction.YOURDOMAIN.COM`. Also change the protocol for these values from `http` to `https`
+
+
+Restart Reaction for changes to take effect.
+```
+docker-compose down -v && docker-compose up -d
+```
+
+In the `example-storefront` directory open the `.env` file and substitute the the default value for `CANONICAL_URL` with your subdomain, i.e. `https://storefront.YOURDOMAIN.COM`. Set `EXTERNAL_GRAPHQL_URL` to your reaction sub-domain, i.e. `https://reaction.YOURDOMAIN.COM`. Set `OAUTH2_AUTH_URL` to your sub-domain, keep the path part and remove the port, i.e. `https://hydra.YOURDOMAIN.com/oauth2/auth`. Set `OAUTH2_IDP_HOST_URL` to `https://reaction.YOURDOMAIN.COM`. Set `OAUTH2_REDIRECT_URL` to your `https://storefront.YOURDOMAIN.COM` keepy the path part and port of the existing value.
+
+Restart the Example Storefront for changes to take effect.
+```
+docker-compose down -v && docker-compose up -d
+```
+
+In the `reaction-hydra` open the file and substitute the value of `OAUTH2_CONSENT_URL` with your `https://reaction.YOURDOMAIN.COM` value, subtitute the value of `OAUTH2_ISSUER_URL` with your `https://hydra.YOURDOMAIN.COM` value, and lastly substitute the value of `OAUTH2_LOGIN_URL` with your `https://reaction.YOURDOMAIN.COM` value.
+
+Restart the Hydra for changes to take effect.
+```
+docker-compose down -v && docker-compose up -d
+```
+
+**NOTE:** Use the restart command stated above, which include the flag `-v` which directs docker to destroy existing volumes, so that new ones will be created.
+
+At this point, Reaction, Example Storefront and Hydry should be accessible over the internet, inculding login in via the storefront using the default username: `admin@localhost` and password: `r3@cti0n`.
+
+Further, the `GraphQL API` explorer will be available at `https://reaction.YOURDOMAIN.COM/graphql-beta`. Test access to it by executing the query:
+
+```
+{
+  primaryShopId
+}
+```
