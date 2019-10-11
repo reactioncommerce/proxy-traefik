@@ -114,7 +114,7 @@ The credentials will be used in Traefik's configuration to setup HTTP Basic Auth
 Clone the [proxy](git@github.com:reactioncommerce/proxy.git) repository to a directory on you host. This repo contains the necessary files to correctly configure Traefik as a reverse proxy for the Reaction Platform.
 
 ```
-git clone git@github.com:reactioncommerce/proxy.git
+git clone git@github.com:reactioncommerce/proxy-traefik.git
 ```
 
 `cd` into the `traefik` directory and open the `docker-compose.yml` file. Under the `environment` section, substitute `YOUR_DIGITALOCEAN_AUTH_TOKEN` with your actual DO Auth token, save and close. Further, substitute `REPLACE_WITH_PATH_TO_TRAEFIK_FOLDER` with the path to the traefik folder, i.e. `/home/your_user/proxy/traefik/`
@@ -223,5 +223,5 @@ Further, the `GraphQL API` explorer will be available at `https://reaction.examp
 ```
 curl 'https://reaction.example.com/graphql-beta' \
   -H 'content-type: application/json' \
-  --data '{"operationName":null,"variables":{},"query":"{  primaryShopId }"}' 
+  --data '{"variables":{},"query":"{  primaryShopId }"}' 
 ```
