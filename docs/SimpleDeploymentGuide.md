@@ -2,7 +2,7 @@
 
 ### Overview
 
-This deployment guide's purpose is to make it easy for Reaction users to deploy the Reaction platform for evaluation purposes or small deployments. This guide is not meant to generate an enterprise production grade deployment. This deployment guide does not use Kubernetes, instead, Docker Composed is used to manage containers.
+This deployment guide's purpose is to make it easy for Reaction users to deploy the Reaction platform for evaluation purposes or small deployments. This guide is not meant to generate an enterprise production grade deployment. This deployment guide does not use Kubernetes, instead, Docker Compose is used to manage containers.
 
 ### Requirements
 
@@ -24,7 +24,7 @@ This deployment guide's purpose is to make it easy for Reaction users to deploy 
 
 **Preparing the Linux host**
 
-In this guide a DigitalOcean node will be used to host the Reaction Platform. If you don't yet have an account, create one at [digitalocean.com](https://digitalocean.com). Once you are signed into your account, create a new droplet using the Ubuntu 18.4 image with at least 1GB of RAM and then follow the instruction [here](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04) to prepare the host. Enable DigitalOceans [free firewall](https://www.digitalocean.com/docs/networking/firewalls/) and add inbound rules for SSH, HTTP, HTTPS and add your droplet to the firewall.
+In this guide a DigitalOcean node will be used to host the Reaction Platform. If you don't yet have an account, create one at [digitalocean.com](https://digitalocean.com). Once you are signed into your account, create a new droplet using the Ubuntu 18.4 image with at least 1GB of RAM and then follow the instruction [here](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04) to prepare the host. Enable DigitalOcean's [free firewall](https://www.digitalocean.com/docs/networking/firewalls/) and add inbound rules for SSH, HTTP, HTTPS and add your droplet to the firewall.
 
 Next, install Make, Docker and Docker Compose.
 
@@ -143,7 +143,7 @@ Now its time to use your browser and navigate to `traefik.example.com` and you s
 
 **Expose Reaction Platform services**
 
-In this section the Reaction Platform services will be exposed to the public web. Thi will be achieve by adding labels to each of the services that contain their corresponding subdomain.
+In this section the Reaction Platform services will be exposed to the public web. This will be achieved by adding labels to each of the services that contain their corresponding subdomain.
 
 ###### Expose the Reaction API
 
@@ -216,7 +216,7 @@ Restart the Hydra for changes to take effect.
 docker-compose down && docker-compose up -d
 ```
 
-At this point, Reaction, Example Storefront and Hydry should be accessible over the internet, inculding login in via the storefront using the default username: `admin@localhost` and password: `r3@cti0n`.
+At this point, Reaction, Example Storefront and Hydra should be accessible over the internet, inculding login in via the storefront using the default username: `admin@localhost` and password: `r3@cti0n`.
 
 Further, the `GraphQL API` explorer will be available at `https://reaction.example.com/graphql-beta`. Test access to it by executing the query:
 
