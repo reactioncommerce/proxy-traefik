@@ -74,10 +74,10 @@ This guide will use the following sub-domains:
 
 | subdomain                 | description                           |
 | ------------------------- | ------------------------------------- |
-| reaction.yourdomain.com   | The Reaction core API and Operator UI |
-| storefront.yourdomain.com | The example storefront                |
-| hydra.yourdomain.com      | Hydra OAuth 2.0 server                |
-| traefik.yourdomain.com    | Traefik's admin UI                    |
+| reaction.example.com   | The Reaction core API and Operator UI |
+| storefront.example.com | The example storefront                |
+| hydra.example.com      | Hydra OAuth 2.0 server                |
+| traefik.example.com    | Traefik's admin UI                    |
 
 Each of your domains will need an `A` DNS record that resolves to your host's IP. Further, in order to obtain SSl certificates for your sub-domains, you will need a DNS manager tha supports [CAA](https://support.dnsimple.com/articles/caa-record/) records. I recommend using DigitalOcean's free [DNS manager](https://www.digitalocean.com/docs/networking/dns/overview/)
 
@@ -119,7 +119,7 @@ git clone git@github.com:reactioncommerce/proxy.git
 
 `cd` into the `traefik` directory and open the `docker-compose.yml` file. Under the `environment` section, substitute `YOUR_DIGITALOCEAN_AUTH_TOKEN` with your actual DO Auth token, save and close. Further, substitute `REPLACE_WITH_PATH_TO_TRAEFIK_FOLDER` with the path to the traefik folder, i.e. `/home/your_user/proxy/traefik/`
 
-Next, open the `traefik.toml` file and find the `entryPoints` section and substitute `YOUR_USER:YOUR_ENCRYPTED_PASSWORD` with actual value generated previously. Further, under the `acme` section substitute `YOUR_EMAIL` and `YOUR_DOMAIN` with your values. Use your TLD domain not your subdomain, as the CAA record will a wildcard record, meaning that it will generate SSL certificates for subdomains, i.e. `yourdomain.com`.
+Next, open the `traefik.toml` file and find the `entryPoints` section and substitute `YOUR_USER:YOUR_ENCRYPTED_PASSWORD` with actual value generated previously. Further, under the `acme` section substitute `YOUR_EMAIL` and `YOUR_DOMAIN` with your values. Use your TLD domain not your subdomain, as the CAA record will a wildcard record, meaning that it will generate SSL certificates for subdomains, i.e. `example.com`.
 
 A wildcard CAA record must be generated in your
 DNS provider with the following settings:
@@ -139,7 +139,7 @@ docker create network internal
 
 Within the `traefik` folder execute `chmod 600 traefik.toml` to set the correct permissions and `docker-compose up` to confirm the service starts successfully, the logs should display `Attaching to Traefik` and nothing else.
 
-Now its time to use your browser and navigate to `traefik.yourdomain.com` and you should be presented with a browser prompt for credentials, use the user name and password you used in the section above. Note: use the un-encrypted version of your password. Upon successful entry, you should be presented with Traefik's admin UI.
+Now its time to use your browser and navigate to `traefik.example.com` and you should be presented with a browser prompt for credentials, use the user name and password you used in the section above. Note: use the un-encrypted version of your password. Upon successful entry, you should be presented with Traefik's admin UI.
 
 **Expose Reaction Platform services**
 
@@ -177,36 +177,51 @@ In the Traefik admin UI verify a frontend exists for the `example-storefront` an
 Serveral environment variables need to changed to reflect sub-domains for each project.
 
 
-In the `reaction` directory open the `.env` file and substitute the default value of `ROOT_URL` to reflect your sub-domain, i.e. `ROOT_URL=https://reaction.YOURDOMAIN.COM`. Also change the protocol for these values from `http` to `https`
+In the `reaction` directory open the `.env` file and substitute the default vaues as seen below:
 
+| Environment Variable         | Value                           |
+| ---------------------------- | ------------------------------------- |
+| ROOT_URL                   |  https://reaction.example.com
 
 Restart Reaction for changes to take effect.
 ```
-docker-compose down -v && docker-compose up -d
+docker-compose down && docker-compose up -d
 ```
 
-In the `example-storefront` directory open the `.env` file and substitute the the default value for `CANONICAL_URL` with your subdomain, i.e. `https://storefront.YOURDOMAIN.COM`. Set `EXTERNAL_GRAPHQL_URL` to your reaction sub-domain, i.e. `https://reaction.YOURDOMAIN.COM`. Set `OAUTH2_AUTH_URL` to your sub-domain, keep the path part and remove the port, i.e. `https://hydra.YOURDOMAIN.com/oauth2/auth`. Set `OAUTH2_IDP_HOST_URL` to `https://reaction.YOURDOMAIN.COM`. Set `OAUTH2_REDIRECT_URL` to your `https://storefront.YOURDOMAIN.COM` keepy the path part and port of the existing value.
+In the `example-storefront` directory open the `.env` file and substitute the the default values as seen below:
+
+| Environment Variable         | Value                           |
+| ---------------------------- | ------------------------------------- |
+| CANONICAL_URL                   |  https://storefront.example.com |
+| EXTERNAL_GRAPHQL_URL            |  https://reaction.example.com |
+| OAUTH2_AUTH_URL            |  https://hydra.example.com/oauth2/auth |
+| OAUTH2_IDP_HOST_URL            |  https://reaction.example.com |
+| OAUTH2_REDIRECT_URL            |  https://storefront.example.com |
 
 Restart the Example Storefront for changes to take effect.
 ```
-docker-compose down -v && docker-compose up -d
+docker-compose down && docker-compose up -d
 ```
 
-In the `reaction-hydra` open the file and substitute the value of `OAUTH2_CONSENT_URL` with your `https://reaction.YOURDOMAIN.COM` value, subtitute the value of `OAUTH2_ISSUER_URL` with your `https://hydra.YOURDOMAIN.COM` value, and lastly substitute the value of `OAUTH2_LOGIN_URL` with your `https://reaction.YOURDOMAIN.COM` value.
+In the `reaction-hydra` open the `.env` file and substitute the values as seen below: 
+
+| Environment Variable         | Value                           |
+| ---------------------------- | ------------------------------------- |
+| OAUTH2_CONSENT_URL            |  https://reaction.example.com |
+| OAUTH2_ISSUER_URL            |  https://hydra.example.com |
+| OAUTH2_LOGIN_URL            |  https://reaction.example.com |
 
 Restart the Hydra for changes to take effect.
 ```
-docker-compose down -v && docker-compose up -d
+docker-compose down && docker-compose up -d
 ```
-
-**NOTE:** Use the restart command stated above, which include the flag `-v` which directs docker to destroy existing volumes, so that new ones will be created.
 
 At this point, Reaction, Example Storefront and Hydry should be accessible over the internet, inculding login in via the storefront using the default username: `admin@localhost` and password: `r3@cti0n`.
 
-Further, the `GraphQL API` explorer will be available at `https://reaction.YOURDOMAIN.COM/graphql-beta`. Test access to it by executing the query:
+Further, the `GraphQL API` explorer will be available at `https://reaction.example.com/graphql-beta`. Test access to it by executing the query:
 
 ```
-{
-  primaryShopId
-}
+curl 'https://reaction.example.com/graphql-beta' \
+  -H 'content-type: application/json' \
+  --data '{"operationName":null,"variables":{},"query":"{  primaryShopId }"}' 
 ```
