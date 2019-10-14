@@ -24,11 +24,11 @@ This deployment guide's purpose is to make it easy for Reaction users to deploy 
 
 **Preparing the Linux host**
 
-In this guide a DigitalOcean node will be used to host the Reaction Platform. If you don't yet have an account, create one at [digitalocean.com](https://digitalocean.com). Once you are signed into your account, create a new droplet using the Ubuntu 18.4 image with at least 1GB of RAM and then follow the instruction [here](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04) to prepare the host. Enable DigitalOcean's [free firewall](https://www.digitalocean.com/docs/networking/firewalls/) and add inbound rules for SSH, HTTP, HTTPS and add your droplet to the firewall.
+In this guide a DigitalOcean node will be used to host the Reaction Platform. If you don't yet have an account, create one at [digitalocean.com](https://digitalocean.com). Once you are signed into your account, create a new droplet using the Ubuntu 18.4 image with at least 2GB of RAM and then follow the instruction [here](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04) to prepare the host. Enable DigitalOcean's [free firewall](https://www.digitalocean.com/docs/networking/firewalls/) and add inbound rules for SSH, HTTP, HTTPS and add your droplet to the firewall.
 
 Next, install Make, Docker and Docker Compose.
 
-Install make by executing: `sudo apt install build-essential`
+Install make by executing: `sudo apt-get update && sudo apt install build-essential`
 
 Enable swap file by following instructions [here](https://www.cyberciti.biz/faq/linux-add-a-swap-file-howto/) use at least 4GB.
 
@@ -38,7 +38,7 @@ Install Docker Compose by following instructions [here](https://docs.docker.com/
 
 Install Node and NPM using NVM by following instructions [here](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04#installing-using-nvm)
 
-Install Yarn without recommended packages by executing, `sudo apt-get update && sudo apt-get install --no-install-recommends yarn`
+Install Yarn without recommended packages by executing, `sudo apt-get install --no-install-recommends yarn`
 
 Generate a new SSH key by following instructions [here](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) and add it key to your GitHub account [settings](https://github.com/settings/keys).
 
@@ -46,7 +46,7 @@ OPTIONAL: add the following aliases to your `~/.bashrc` to execute Docker and Do
 
 **Clone the Reaction Platform**
 
-Clone the [Reaction platform](https://github.com/reactioncommerce/reaction-platform) repository to a directory on your host and execute the `make`. The reaction platform code bases will be downloaded, Docker images built and Docker networks created, this can take a few minutes.
+Clone the [Reaction platform](https://github.com/reactioncommerce/reaction-platform) repository to a directory on your host and cd into it. Before excuting the make command, ensure your user is in the docker group by executing `sudo usermod -a -G docker $USER` and then execute the `make`. The reaction platform code bases will be downloaded, Docker images built and Docker networks created, this can take a few minutes.
 
 ```
 git clone git@github.com:reactioncommerce/reaction-platform.git
@@ -111,13 +111,13 @@ The credentials will be used in Traefik's configuration to setup HTTP Basic Auth
 
 **Configure Traefik**
 
-Clone the [proxy](git@github.com:reactioncommerce/proxy.git) repository to a directory on you host. This repo contains the necessary files to correctly configure Traefik as a reverse proxy for the Reaction Platform.
+Clone the [proxy](git@github.com:reactioncommerce/proxy-traefik.git) repository to a directory on you host. This repo contains the necessary files to correctly configure Traefik as a reverse proxy for the Reaction Platform.
 
 ```
 git clone git@github.com:reactioncommerce/proxy-traefik.git
 ```
 
-`cd` into the `traefik` directory and open the `docker-compose.yml` file. Under the `environment` section, substitute `YOUR_DIGITALOCEAN_AUTH_TOKEN` with your actual DO Auth token, save and close. Further, substitute `REPLACE_WITH_PATH_TO_TRAEFIK_FOLDER` with the path to the traefik folder, i.e. `/home/your_user/proxy/traefik/`
+`cd` into the `traefik` directory and open the `docker-compose.yml` file. Under the `environment` section, substitute `YOUR_DIGITALOCEAN_AUTH_TOKEN` with your actual DO Auth token, save and close. Further, substitute `your_username` in the path to the traefik folder, i.e. `/home/your_user/proxy/traefik/` with your user name, this is assuming that you cloned the repository your user's home directory, if that is not the case, modify accordingly.
 
 Next, open the `traefik.toml` file and find the `entryPoints` section and substitute `YOUR_USER:YOUR_ENCRYPTED_PASSWORD` with actual value generated previously. Further, under the `acme` section substitute `YOUR_EMAIL` and `YOUR_DOMAIN` with your values. Use your TLD domain not your subdomain, as the CAA record will a wildcard record, meaning that it will generate SSL certificates for subdomains, i.e. `example.com`.
 
@@ -133,11 +133,11 @@ flags: 0
 Create the `web` Docker network, it will be the Docker network that Traefik will be on. And also create an `internal` Docker network for internal service communication.
 
 ```
-docker create network web
-docker create network internal
+docker network create web
+docker network create internal
 ```
 
-Within the `traefik` folder execute `chmod 600 traefik.toml` to set the correct permissions and `docker-compose up` to confirm the service starts successfully, the logs should display `Attaching to Traefik` and nothing else.
+Within the `traefik` folder execute `chmod 600 traefik.toml && chmod 600 acme.json` to set the correct permissions and `docker-compose up` to confirm the service starts successfully, the logs should display `Attaching to Traefik` and nothing else.
 
 Now its time to use your browser and navigate to `traefik.example.com` and you should be presented with a browser prompt for credentials, use the user name and password you used in the section above. Note: use the un-encrypted version of your password. Upon successful entry, you should be presented with Traefik's admin UI.
 
@@ -155,7 +155,7 @@ cp /home/your_username/proxy/reaction/docker-compose.override.yml /home/your_use
 
 2. Change the working directory to the reaction directory within the Reaction Platform.
 
-3. Edit the `docker-compose.override.yml` file by substituting `YOUR_DOMAIN.COM` under the labels section with your actual domain.
+3. Edit the `docker-compose.override.yml` file by substituting the value of the `traefik.frontend.rule` label with your actual domain, i.e. `reaction.yourdomain.com`. 
 
 4. Restart the Reaction service for the updates to take effect.
 
@@ -163,7 +163,7 @@ cp /home/your_username/proxy/reaction/docker-compose.override.yml /home/your_use
 docker-compose down && docker-compose up -d
 ```
 
-5. In the Traefik admin there should be a new frontend for `reaction.YOUDOMAIN.COM`
+5. In the Traefik admin there should be a new frontend for `reaction.example.com`
 
 ###### Expose the example storefront, and hydra services
 

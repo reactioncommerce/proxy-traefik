@@ -9,7 +9,7 @@ services:
     labels:
       - 'traefik.backend=web'
       - 'traefik.port=4000'
-      - 'traefik.frontend.rule=Host:storefront.YOUR_DOMAIN.COM'
+      - 'traefik.frontend.rule=Host:storefront.example.com'
       # Uncomment to password protect the storefront
       # - 'traefik.frontend.auth.basic.removeHeader=true'
       # - 'traefik.frontend.auth.basic=YOUR_USER:YOUR_ENCRYPTED_PASSWORD'

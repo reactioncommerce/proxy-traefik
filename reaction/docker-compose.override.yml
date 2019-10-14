@@ -9,7 +9,7 @@ services:
     labels:
       - 'traefik.backend=reaction'
       - 'traefik.port=3000'
-      - 'traefik.frontend.rule=Host:reaction.YOUR_DOMAIN.COM'
+      - 'traefik.frontend.rule=Host:reaction.example.com'
       # Uncomment to password protect the Reaction API
       # - 'traefik.frontend.auth.basic.removeHeader=true'
       # - 'traefik.frontend.auth.basic=YOUR_USER:YOUR_ENCRYPTED_PASSWORD'
