@@ -16,7 +16,7 @@ services:
       - DO_AUTH_TOKEN=YOUR_DIGITALOCEAN_AUTH_TOKEN
     labels:
       - traefik.backend=traefik
-      - traefik.frontend.rule=Host:traefik.YOURDOMAIN.COM
+      - traefik.frontend.rule=Host:traefik.example.com
       - traefik.docker.network=web
       - traefik.port=8080
     volumes:

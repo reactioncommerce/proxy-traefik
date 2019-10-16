@@ -1,4 +1,4 @@
-version: '3.4'
+version: "3.4"
 
 networks:
   web:
@@ -20,9 +20,9 @@ services:
     restart: always
     container_name: "portainer-app"
     labels:
-      - 'traefik.backend=portainer'
-      - 'traefik.port=9000'
-      - 'traefik.frontend.rule=Host:portainer-dev.willopez.com'
+      - "traefik.backend=portainer"
+      - "traefik.port=9000"
+      - "traefik.frontend.rule=Host:portainer.example.com"
     #Automatically choose 'Manage the Docker instance where Portainer is running' by adding <--host=unix:///var/run/docker.sock> to the command
     command: --templates http://templates/templates.json
     networks:
