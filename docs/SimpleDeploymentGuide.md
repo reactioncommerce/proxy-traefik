@@ -117,7 +117,10 @@ Clone the [proxy](git@github.com:reactioncommerce/proxy-traefik.git) repository 
 git clone git@github.com:reactioncommerce/proxy-traefik.git
 ```
 
-`cd` into the `traefik` directory and open the `docker-compose.yml` file. Under the `environment` section, substitute `YOUR_DIGITALOCEAN_AUTH_TOKEN` with your actual DO Auth token, save and close. Further, substitute `your_username` in the path to the traefik folder, i.e. `/home/your_user/proxy/traefik/` with your user name, this is assuming that you cloned the repository your user's home directory, if that is not the case, modify accordingly.
+`cd` into the `traefik` directory and open the `docker-compose.yml` file. Under the `environment` section, substitute `YOUR_DIGITALOCEAN_AUTH_TOKEN` with your actual DO Auth token, save and close.
+or if you prefer CloudFlare and not DigitalOcean for your DNS challenge, set: `CLOUDFLARE_EMAIL` and `CLOUDFLARE_API_KEY` (This is the General CA API key)
+
+Further, substitute `your_username` in the path to the traefik folder, i.e. `/home/your_user/proxy/traefik/` with your user name, this is assuming that you cloned the repository your user's home directory, if that is not the case, modify accordingly.
 
 Next, open the `traefik.toml` file and find the `entryPoints` section and substitute `YOUR_USER:YOUR_ENCRYPTED_PASSWORD` with actual value generated previously. Further, under the `acme` section substitute `YOUR_EMAIL` and `YOUR_DOMAIN` with your values. Use your TLD domain not your subdomain, as the CAA record will a wildcard record, meaning that it will generate SSL certificates for subdomains, i.e. `example.com`.
 
