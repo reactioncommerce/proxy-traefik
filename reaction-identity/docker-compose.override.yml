@@ -1,0 +1,14 @@
+version: '3'
+
+networks:
+  web:
+    external:
+      name: web
+services:
+  identity:
+    labels:
+      - 'traefik.backend=identity'
+      - 'traefik.port=4100'
+      - 'traefik.frontend.rule=Host:identity.example.com'
+    networks:
+      web:

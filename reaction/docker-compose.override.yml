@@ -5,11 +5,11 @@ networks:
     external:
       name: web
 services:
-  reaction:
+  api:
     labels:
-      - 'traefik.backend=reaction'
+      - 'traefik.backend=api'
       - 'traefik.port=3000'
-      - 'traefik.frontend.rule=Host:reaction.example.com'
+      - 'traefik.frontend.rule=Host:api.example.com'
       # Uncomment to password protect the Reaction API
       # - 'traefik.frontend.auth.basic.removeHeader=true'
       # - 'traefik.frontend.auth.basic=YOUR_USER:YOUR_ENCRYPTED_PASSWORD'

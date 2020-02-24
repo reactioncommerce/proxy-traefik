@@ -1,0 +1,14 @@
+version: '3'
+
+networks:
+  web:
+    external:
+      name: web
+services:
+  reaction-admin:
+    labels:
+      - 'traefik.backend=reaction-admin'
+      - 'traefik.port=4080'
+      - 'traefik.frontend.rule=Host:admin.example.com'
+    networks:
+      web:

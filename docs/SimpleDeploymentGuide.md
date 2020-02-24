@@ -12,8 +12,7 @@ This deployment guide's purpose is to make it easy for Reaction users to deploy 
 - Git
 - Node
 - Yarn
-- Portainer
-- Registered domain
+- A registered domain
 - Some familiarity with [Traefik](https://traefik.io)
 
 ### Architecture
@@ -72,11 +71,13 @@ In this section Reaction and the example storefront will be exposed to the publi
 
 This guide will use the following sub-domains:
 
-| subdomain                 | description                           |
-| ------------------------- | ------------------------------------- |
-| reaction.example.com   | The Reaction core API and Operator UI |
+| subdomain              | description                           |
+| ---------------------- | ------------------------------------- |
+| api.example.com        | The Reaction  GraphQL API             |
 | storefront.example.com | The example storefront                |
+| admin.example.com      | The Reaction admin interface          |
 | hydra.example.com      | Hydra OAuth 2.0 server                |
+| identity.example.com   | The Reaction Identity service         |
 | traefik.example.com    | Traefik's admin UI                    |
 
 Each of your domains will need an `A` DNS record that resolves to your host's IP. Further, in order to obtain SSl certificates for your sub-domains, you will need a DNS manager tha supports [CAA](https://support.dnsimple.com/articles/caa-record/) records. I recommend using DigitalOcean's free [DNS manager](https://www.digitalocean.com/docs/networking/dns/overview/)
@@ -155,7 +156,7 @@ cp /home/your_username/proxy/reaction/docker-compose.override.yml /home/your_use
 
 2. Change the working directory to the reaction directory within the Reaction Platform.
 
-3. Edit the `docker-compose.override.yml` file by substituting the value of the `traefik.frontend.rule` label with your actual domain, i.e. `reaction.yourdomain.com`. 
+3. Edit the `docker-compose.override.yml` file by substituting the value of the `traefik.frontend.rule` label with your actual domain, i.e. `reaction.example.com`.
 
 4. Restart the Reaction service for the updates to take effect.
 
@@ -171,47 +172,48 @@ Repeat steps 1-5 for the `example-storefront` and `reaction-hydra` directories.
 
 In the Traefik admin UI verify a frontend exists for the `example-storefront` and `hydra`
 
-
 ##### Configure Environment Variables
 
-Serveral environment variables need to changed to reflect sub-domains for each project.
+Several environment variables need to changed to reflect sub-domains for each project.
 
+In the `reaction` directory open the `.env` file and substitute the default values as seen below:
 
-In the `reaction` directory open the `.env` file and substitute the default vaues as seen below:
-
-| Environment Variable         | Value                           |
-| ---------------------------- | ------------------------------------- |
-| ROOT_URL                   |  https://reaction.example.com
+| Environment Variable | Value                        |
+| -------------------- | ---------------------------- |
+| ROOT_URL             | https://reaction.example.com |
 
 Restart Reaction for changes to take effect.
+
 ```
 docker-compose down && docker-compose up -d
 ```
 
 In the `example-storefront` directory open the `.env` file and substitute the the default values as seen below:
 
-| Environment Variable         | Value                           |
-| ---------------------------- | ------------------------------------- |
-| CANONICAL_URL                   |  https://storefront.example.com |
-| EXTERNAL_GRAPHQL_URL            |  https://reaction.example.com |
-| OAUTH2_AUTH_URL            |  https://hydra.example.com/oauth2/auth |
-| OAUTH2_IDP_HOST_URL            |  https://reaction.example.com |
-| OAUTH2_REDIRECT_URL            |  https://storefront.example.com |
+| Environment Variable | Value                                 |
+| -------------------- | ------------------------------------- |
+| CANONICAL_URL        | https://storefront.example.com        |
+| EXTERNAL_GRAPHQL_URL | https://reaction.example.com          |
+| OAUTH2_AUTH_URL      | https://hydra.example.com/oauth2/auth |
+| OAUTH2_IDP_HOST_URL  | https://reaction.example.com          |
+| OAUTH2_REDIRECT_URL  | https://storefront.example.com        |
 
 Restart the Example Storefront for changes to take effect.
+
 ```
 docker-compose down && docker-compose up -d
 ```
 
-In the `reaction-hydra` open the `.env` file and substitute the values as seen below: 
+In the `reaction-hydra` open the `.env` file and substitute the values as seen below:
 
-| Environment Variable         | Value                           |
-| ---------------------------- | ------------------------------------- |
-| OAUTH2_CONSENT_URL            |  https://reaction.example.com |
-| OAUTH2_ISSUER_URL            |  https://hydra.example.com |
-| OAUTH2_LOGIN_URL            |  https://reaction.example.com |
+| Environment Variable | Value                        |
+| -------------------- | ---------------------------- |
+| OAUTH2_CONSENT_URL   | https://reaction.example.com |
+| OAUTH2_ISSUER_URL    | https://hydra.example.com    |
+| OAUTH2_LOGIN_URL     | https://reaction.example.com |
 
 Restart the Hydra for changes to take effect.
+
 ```
 docker-compose down && docker-compose up -d
 ```
@@ -223,5 +225,5 @@ Further, the `GraphQL API` explorer will be available at `https://reaction.examp
 ```
 curl 'https://reaction.example.com/graphql-beta' \
   -H 'content-type: application/json' \
-  --data '{"variables":{},"query":"{  primaryShopId }"}' 
+  --data '{"variables":{},"query":"{  primaryShopId }"}'
 ```
