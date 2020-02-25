@@ -162,7 +162,7 @@ that need to be updated and a description of each.
 | ---------------------- | ----------------------------------------------------------------------------|
 | create_user            | The name of the Linux user that will be created, suggested value `reaction` |
 | do_auth_token          | The Authentication token for the Digital Ocean API                          |
-| traefik_admin_password | The encrypted password generated with htpasswd                              |
+| traefik_admin_password | The encrypted password generated with htpasswd, use the password value only, without the user name. In other words, everything after the colon in the generate encrypted password, i.e.`reaction:#$$aaou1775aosetnuhaon`                               |
 | email                  | An email address to receive SSl certificate notifications                   |
 | domain                 | Your registered domain                                                      |
 
