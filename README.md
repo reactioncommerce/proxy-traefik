@@ -1,4 +1,4 @@
-# Simple Deployment Guide for the Reaction Platform on Digital Ocean
+# Deploy the Reaction Platform on Digital Ocean
 
 ### Overview
 
@@ -57,12 +57,9 @@ Each of your domains will need an `A` DNS record that resolves to your host's IP
 Further, you will need a [DigitalOcean Auth token](https://www.digitalocean.com/docs/api/create-personal-access-token/) to generate CAA records for your sub-domains.
 
 
-
 # Automated Server Configuration
 
 In order to expedite the installation of server dependencies, Ansible will be used to automate most of the server configuration.
-
-### Getting started
 
 **Prepare the Remote Host**
 
@@ -73,30 +70,6 @@ Copy the newly created IP address and verify that you can login into the new ser
 ```
 ssh root@XXX.XXX.XXX.XXX
 ```
-
-**Generate a secure password for HTTP Basic Auth**
-
-On your remote host install the `htpasswd` utility to generate an encrypted password for the Traefik admin UI.
-
-```
-sudo apt-get install apache2-utils
-```
-
-Generate a secure password and save it to a secure location. Substitute `my_secure_password` with the password you would like to use for the Traefik admin UI.
-
-```
-htpasswd -nb reaction my_secure_password
-```
-
-The out put will look like this:
-
-```
-reaction:$apr1$pPP6CJbi$5VavZVj7DVbLyAe1TkrCm1
-```
-
-NOTE: Sometimes, `htpasswd` will generate passwords that contain `/` or `\` which can be problematic, execute command until a password without slashes is generated.
-
-The credentials will be used in Traefik's configuration to setup HTTP Basic Authentication
 
 **Prepare Control Node(local computer)**
 
@@ -154,6 +127,30 @@ reaction.dev | SUCCESS => {
     "ping": "pong"
 }
 ```
+
+**Generate a secure password for HTTP Basic Auth**
+
+On your remote host install the `htpasswd` utility to generate an encrypted password for the Traefik admin UI.
+
+```
+sudo apt-get install apache2-utils
+```
+
+Generate a secure password and save it to a secure location. Substitute `my_secure_password` with the password you would like to use for the Traefik admin UI.
+
+```
+htpasswd -nb reaction my_secure_password
+```
+
+The out put will look like this:
+
+```
+reaction:$apr1$pPP6CJbi$5VavZVj7DVbLyAe1TkrCm1
+```
+
+NOTE: Sometimes, `htpasswd` will generate passwords that contain `/` or `\` which can be problematic, execute command until a password without slashes is generated.
+
+The credentials will be used in Traefik's configuration to setup HTTP Basic Authentication
 
 **Set Ansible Environment Variables**
 
