@@ -161,13 +161,10 @@ For the rest of the variables, the default values should be used, DO NOT change 
 
 ###### Execute the playbook
 
-Now it's time to execute the `reaction.yml` playbook, which automates most of the tedious server configuration tasks. Move into the `playbooks` and execute the following command:
+Now it's time to execute the `reaction.yml` playbook, which automates most of the tedious server configuration tasks, execute the following command:
+
 ```
-cd playbooks
-```
-Execute playbook
-```
-ansible-playbook reaction.yml -l reaction.server
+ansible-playbook playbooks/reaction.yml -l reaction.server
 ```
 
 NOTE: the `-l reaction.server` limits the execution of the playbook to the `reaction.server` host.
