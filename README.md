@@ -4,6 +4,21 @@
 
 This deployment guide's purpose is to provide a simple and easy guide on how to deploy the Reaction platform for evaluation purposes or small deployments. This guide is not meant to generate an enterprise production grade deployment. This deployment guide does not use Kubernetes, instead, Docker Compose is used to manage containers.
 
+## Table of Contents
+- [Requirements](#requirements)
+- [Reaction Services Overview](#reaction-platform-services-overview)
+- [Architecture Diagram](#architecture-diagram)
+- [Getting Started](#getting-started)
+- [Automated Server Configuration](#automated-server-configuration)
+    - [Prepare the Remote Host](#prepare-the-remote-host)
+    - [Prepare the Control Node](#prepare-the-control-node)
+    - [Configure the remote host to be managed with Ansible](#configure-the-remote-host-to-be-managed-with-ansible)
+    - [Generate a secure password for HTTP Basic Auth](#generate-a-secure-password-for-http-basic-auth)
+    - [Set Ansible Environment Variables](#set-ansible-environment-variables)
+    - [Execute the Playbook](#execute-the-playbook)
+    - [Create the Primary Shop](#create-the-primary-shop)
+- [Command Cheatsheet](#command-cheatsheet)
+
 ### Requirements
 
 - A Linux host with at least 2GB of RAM, this guide uses a DigitalOcean droplet
@@ -61,9 +76,11 @@ Further, you will need a [DigitalOcean Auth token](https://www.digitalocean.com/
 
 In order to expedite the installation of server dependencies, Ansible will be used to automate most of the server configuration.
 
-**Prepare the Remote Host**
+###### Prepare the Remote Host
 
-Create a new droplet in you DigitalOcean dashboard with at least 2GB of RAM. When creating the droplet, either select an existing SSH key to login or click on the "New SSH Key" under the authentication section  and copy your public SSH key from your local computer.
+In this guide a DigitalOcean node will be used to host the Reaction Platform. If you don't yet have an account, create one at [digitalocean.com](https://digitalocean.com). Once you are signed into your account, create a new droplet using the Ubuntu 18.4 image with at least 2GB of RAM. Enable DigitalOcean's [free firewall](https://www.digitalocean.com/docs/networking/firewalls/) and add inbound rules for SSH, HTTP, HTTPS and add your droplet to the firewall.
+
+After the droplet is created either select an existing SSH key to login or click on the "New SSH Key" under the authentication section  and copy your public SSH key from your local computer.
 
 Copy the newly created IP address and verify that you can login into the new server by executing:
 
@@ -71,7 +88,7 @@ Copy the newly created IP address and verify that you can login into the new ser
 ssh root@XXX.XXX.XXX.XXX
 ```
 
-**Prepare Control Node(local computer)**
+###### Prepare the Control Node
 
 Ansible requires a control node, which is a computer that manages a remote host. This guide will assumes a Mac laptop/desktop as the control node. 
 
@@ -83,7 +100,7 @@ Also install python3 to avoid deprecation warnings,
 
 `brew install python3`
 
-**Manage the remote host with Ansible**
+###### Configure the remote host to be managed with Ansible
 
 On the control node(i.e. a developer's machine) create an inventory file in which `python3` is specified as the interpreter. On your machine, create a new file at named `hosts` at `/etc/ansible`.
 
@@ -128,9 +145,9 @@ reaction.dev | SUCCESS => {
 }
 ```
 
-**Generate a secure password for HTTP Basic Auth**
+###### Generate a secure password for HTTP Basic Auth
 
-On your remote host install the `htpasswd` utility to generate an encrypted password for the Traefik admin UI.
+In order to secure the Traefik admin interface, it will be necessary to generate a secure password. On your remote host install the `htpasswd` utility to generate an encrypted password for the Traefik admin UI.
 
 ```
 sudo apt-get install apache2-utils
@@ -152,7 +169,7 @@ NOTE: Sometimes, `htpasswd` will generate passwords that contain `/` or `\` whic
 
 The credentials will be used in Traefik's configuration to setup HTTP Basic Authentication
 
-**Set Ansible Environment Variables**
+###### Set Ansible Environment Variables
 
 Before executing the Ansible playbook, it's necessary to set variables that are specific to your deployment. Find the
 `vars` section in the `reaction.yml` playbook and update as necessary, below is a list of the variable 
@@ -168,7 +185,7 @@ that need to be updated and a description of each.
 
 For the rest of the variables, the default values should be used, DO NOT change otherwise, the playbook might fail.
 
-**Execute the playbook**
+###### Execute the playbook
 
 Now it's time to execute the `reaction.yml` playbook, which automates most of the tedious server configuration tasks. Move into the `playbooks` and execute the following command:
 ```
@@ -181,7 +198,7 @@ ansible-playbook reaction.yml -l reaction.server
 
 NOTE: the `-l reaction.server` limits the execution of the playbook to the `reaction.server` host.
 
-**Create Primary Shop**
+###### Create the Primary Shop
 
 At this point the Reaction GraphQL API, Example Storefront, Reaction Admin, Reaction Identity and Hydra should be accessible over the internet.
 
@@ -194,4 +211,35 @@ Login with default username/password: `admin@localhost` and password: `r3@cti0n`
 
 Further, the `GraphQL API` explorer will be available at `https://api.example.com/graphql`.
 
+### Command Cheatsheet
 
+The following bash aliases are automatically added to the remote server for convenience.
+
+```
+# Docker Compose
+alias dc='docker-compose'
+
+# Bring all services down
+alias dcd='docker-compose down'
+
+# Attach to all logs of all services
+alias dcl='docker-compose logs -f'
+
+# Run a comand inside a running container
+alias dcr='docker-compose run --rm'
+
+# "Restart" all services
+alias dcre='docker-compose down && docker-compose up -d && docker-compose logs -f'
+
+# Bring all services up in daemon mode
+alias dcu='docker-compose up -d'
+
+# Bring all containers up and attach to their logs
+alias dcul='docker-compose up -d && docker-compose logs -f'
+
+# Remove exited containers
+alias dprune='docker ps -aq --no-trunc -f status=exited | xargs docker rm'
+
+# Show all running containers, with horizontal paging
+alias dps='docker ps -a | less -S'
+```
