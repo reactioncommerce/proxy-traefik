@@ -3,10 +3,11 @@ defaultEntryPoints = ["http", "https"]
 [entryPoints]
   [entryPoints.dashboard]
     address = ":8080"
-    [entryPoints.dashboard.auth]
-      [entryPoints.dashboard.auth.basic]
+    #[entryPoints.dashboard.auth]
+     #[entryPoints.dashboard.auth.basic]
         # use htpasswd -n YOU_USERNAME to generate an encrypted password
-        users = ["YOUR_USER:YOUR_ENCRYPTED_PASSWORD"]
+        # Uncomment line below to password protect Traefik admin UI
+        # users = ["YOUR_USER:YOUR_ENCRYPTED_PASSWORD"]
 
 [api]
 entrypoint="dashboard"

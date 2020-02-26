@@ -145,30 +145,6 @@ reaction.dev | SUCCESS => {
 }
 ```
 
-###### Generate a secure password for HTTP Basic Auth
-
-In order to secure the Traefik admin interface, it will be necessary to generate a secure password. On your remote host install the `htpasswd` utility to generate an encrypted password for the Traefik admin UI.
-
-```
-sudo apt-get install apache2-utils
-```
-
-Generate a secure password and save it to a secure location. Substitute `my_secure_password` with the password you would like to use for the Traefik admin UI.
-
-```
-htpasswd -nb reaction my_secure_password
-```
-
-The out put will look like this:
-
-```
-reaction:$apr1$pPP6CJbi$5VavZVj7DVbLyAe1TkrCm1
-```
-
-NOTE: Sometimes, `htpasswd` will generate passwords that contain `/` or `\` which can be problematic, execute command until a password without slashes is generated.
-
-The credentials will be used in Traefik's configuration to setup HTTP Basic Authentication
-
 ###### Set Ansible Environment Variables
 
 Before executing the Ansible playbook, it's necessary to set variables that are specific to your deployment. Find the
