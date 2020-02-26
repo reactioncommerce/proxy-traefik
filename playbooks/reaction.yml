@@ -1,0 +1,474 @@
+###########################################################################################################
+# Playbook: Initial Server Setup for the Reaction Platform on a Ubuntu 18.4 Digital Ocean Droplet.
+# This playbook will also configure and docker-compose based deployment of the Reaction platform.
+###################################################################################################################
+
+---
+- hosts: all
+  remote_user: root
+  gather_facts: true
+  vars:
+    do_auth_token: "YOUR_DIGITALOCEAN_AUTH_TOKEN"
+    domain: "YOUR_DOMAIN"
+    email: "YOUR_EMAIL"
+
+    create_user: reaction
+    copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+    docker_compose_version: "1.25.4"
+    nodejs_version: "12.x"
+    proxy_dir: proxy
+    proxy_path: "/home/{{ create_user }}/{{ proxy_dir }}"
+    reaction_dir: reaction-development-platform
+    reaction_platform_path: "/home/{{create_user}}/{{reaction_dir}}"
+    traefik_admin_user: reaction
+    traefik_path: "/home/{{ create_user }}/{{ proxy_dir }}/traefik"
+
+  tasks:
+    - name: Make sure we have a 'wheel' group
+      group:
+        name: wheel
+        state: present
+
+    - name: Make sure we have a 'docker' group to facilitate running docker without sudo.
+      group:
+        name: docker
+        state: present
+
+    - name: Allow 'wheel' group to have password-less sudo
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: "^%wheel"
+        line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+        validate: "/usr/sbin/visudo -cf %s"
+
+    - name: Create a new regular user with sudo privileges
+      user:
+        name: "{{ create_user }}"
+        state: present
+        groups: wheel, docker
+        append: true
+        create_home: true
+        shell: /bin/bash
+
+    - name: Set authorized key for remote user
+      authorized_key:
+        user: "{{ create_user }}"
+        state: present
+        key: "{{ copy_local_key }}"
+
+    - name: Disable password authentication for root
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        state: present
+        regexp: "^#?PermitRootLogin"
+        line: "PermitRootLogin prohibit-password"
+
+    - name: Update apt
+      apt: update_cache=yes
+
+    - name: Install aptitude using apt
+      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop:
+        [
+          "apt-transport-https",
+          "build-essential",
+          "ca-certificates",
+          "curl",
+          "git",
+          "libssl-dev",
+          "software-properties-common",
+          "vim",
+        ]
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+        
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt: update_cache=yes name=docker-ce state=latest
+
+    - name: Ensure docker-compose is installed and available
+      get_url:
+        url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-{{ ansible_system }}-{{ ansible_userspace_architecture }}
+        dest: /usr/local/bin/docker-compose
+        mode: "u=rwx,g=rx,o=rx"
+
+    - name: Add Nodesource apt key.
+      apt_key:
+        url: https://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0x1655A0AB68576280
+        id: "68576280"
+        state: present
+
+    - name: Add NodeSource repositories for Node.js.
+      apt_repository:
+        repo: "{{ item }}"
+        state: present
+      with_items:
+        - "deb https://deb.nodesource.com/node_{{ nodejs_version }} {{ ansible_distribution_release }} main"
+        - "deb-src https://deb.nodesource.com/node_{{ nodejs_version }} {{ ansible_distribution_release }} main"
+      register: node_repo
+
+    - name: Update apt cache if repo was added.
+      apt: update_cache=yes
+      when: node_repo.changed
+      tags: ["skip_ansible_lint"]
+
+    - name: Ensure Node.js and npm are installed.
+      apt: "name=nodejs={{ nodejs_version|regex_replace('x', '') }}* state=present"
+
+    - name: "Yarn | GPG"
+      apt_key:
+        url: https://dl.yarnpkg.com/debian/pubkey.gpg
+        state: present
+
+    - name: "Yarn | Ensure Debian sources list file exists"
+      file:
+        path: /etc/apt/sources.list.d/yarn.list
+        owner: root
+        mode: "0644"
+        state: touch
+
+    - name: "Yarn | Ensure Debian package is in sources list"
+      lineinfile:
+        dest: /etc/apt/sources.list.d/yarn.list
+        regexp: "deb http://dl.yarnpkg.com/debian/ stable main"
+        line: "deb http://dl.yarnpkg.com/debian/ stable main"
+        state: present
+
+    - name: "Yarn | Update APT cache"
+      apt:
+        update_cache: yes
+
+    - name: "Install Yarn"
+      apt:
+        name: yarn
+        state: present
+        install_recommends: no
+
+    - git:
+        repo: "https://github.com/reactioncommerce/reaction-development-platform.git"
+        dest: /home/{{ create_user }}/{{reaction_dir}}
+        version: trunk
+
+    - git:
+        repo: "https://github.com/reactioncommerce/proxy-traefik.git"
+        dest: /home/{{ create_user }}/{{proxy_dir}}
+        version: trunk
+
+    - name: Change owner of the Reaction Platform and proxy to the newly created user
+      command: "chown -R {{create_user}}:{{create_user}} {{reaction_dir}} {{proxy_dir}}"
+      args:
+        warn: false
+        chdir: /home/{{ create_user }}
+
+    - name: Change permissions of the source code directories
+      command: "chmod -R 755 {{reaction_dir}} {{proxy_dir}}"
+      args:
+        warn: false
+        chdir: /home/{{ create_user }}
+
+    - name: "In the Reaction development platform directory use HTTPS protocol to clone repositories"
+      become: yes
+      become_user: "{{ create_user }}"
+      replace:
+        path: "/home/{{create_user}}/{{reaction_dir}}/config.mk"
+        regexp: "git@github.com:"
+        replace: "https://github.com"
+
+    - name: "Build the Reaction Platform"
+      become: yes
+      become_user: "{{ create_user }}"
+      command: make
+      args:
+        chdir: "/home/{{create_user}}/{{reaction_dir}}"
+
+    - name: "Stop all Reaction development platform containers"
+      command: make stop
+      args:
+        chdir: "{{ reaction_platform_path }}"
+
+    - name: Create Docker network named web
+      command: docker network create web
+
+    - name: Create Docker network named internal
+      command: docker network create internal
+
+    - name: "Set DO Auth Token in Traefik's docker-compose.yml"
+      replace:
+        path: "{{ traefik_path}}/docker-compose.yml"
+        regexp: "YOUR_DIGITALOCEAN_AUTH_TOKEN"
+        replace: "{{ do_auth_token }}"
+
+    - name: "Set config files path in Traefik's docker-compose.yml"
+      replace:
+        path: "{{ traefik_path}}/docker-compose.yml"
+        regexp: "your_username"
+        replace: "{{ create_user }}"
+
+    - name: "Set the domain Traefik's docker-compose.yml"
+      replace:
+        path: "{{ traefik_path}}/docker-compose.yml"
+        regexp: "example.com"
+        replace: "{{ domain }}"
+
+    - name: "Set the email in Traefik's config file"
+      replace:
+        path: "{{ traefik_path}}/traefik.toml"
+        regexp: "YOUR_EMAIL"
+        replace: "{{ email }}"
+
+    - name: "Set the domain in Traefik's config file"
+      replace:
+        path: "{{ traefik_path}}/traefik.toml"
+        regexp: "YOUR_DOMAIN"
+        replace: "{{ domain }}"
+
+    - name: "Set correct permissions on traefik.toml"
+      file:
+        path: "{{ traefik_path}}/traefik.toml"
+        mode: "600"
+
+    - name: "Set correct permissions on acme.json"
+      file:
+        path: "{{ traefik_path}}/acme.json"
+        mode: "600"
+
+    - name: "Start Traefik"
+      command: "docker-compose up -d"
+      args:
+        chdir: "{{ traefik_path }}"
+
+    - name: "Copy docker-compose.override.yml files"
+      copy:
+        src: "{{ item.file_src }}"
+        dest: "{{ item.file_dest }}"
+        remote_src: yes
+        owner: "{{ create_user }}"
+        group: "{{ create_user }}"
+        mode: "0644"
+      loop:
+        - {
+            file_src: "{{ proxy_path }}/reaction/docker-compose.override.yml",
+            file_dest: "{{ reaction_platform_path }}/reaction",
+          }
+        - {
+            file_src: "{{ proxy_path }}/example-storefront/docker-compose.override.yml",
+            file_dest: "{{ reaction_platform_path }}/example-storefront",
+          }
+        - {
+            file_src: "{{ proxy_path }}/reaction-admin/docker-compose.override.yml",
+            file_dest: "{{ reaction_platform_path }}/reaction-admin",
+          }
+        - {
+            file_src: "{{ proxy_path }}/reaction-hydra/docker-compose.override.yml",
+            file_dest: "{{ reaction_platform_path }}/reaction-hydra",
+          }
+        - {
+            file_src: "{{ proxy_path }}/reaction-identity/docker-compose.override.yml",
+            file_dest: "{{ reaction_platform_path }}/reaction-identity",
+          }
+
+    - name: "Set the desired domain in all docker-compose.override.yml files"
+      replace:
+        path: "{{ item }}"
+        regexp: "example.com"
+        replace: "{{ domain }}"
+      loop:
+        - "{{ reaction_platform_path }}/reaction/docker-compose.override.yml"
+        - "{{ reaction_platform_path }}/example-storefront/docker-compose.override.yml"
+        - "{{ reaction_platform_path }}/reaction-admin/docker-compose.override.yml"
+        - "{{ reaction_platform_path }}/reaction-hydra/docker-compose.override.yml"
+        - "{{ reaction_platform_path }}/reaction-identity/docker-compose.override.yml"
+
+    - name: "Set Reaction's environment variables"
+      lineinfile:
+        path: "{{ reaction_platform_path }}/reaction/.env"
+        regexp: "^ROOT_URL"
+        line: "ROOT_URL=https://api.{{ domain }}"
+
+    - name: "Set the example storefront's environment variables"
+      lineinfile:
+        path: "{{ reaction_platform_path }}/example-storefront/.env"
+        regexp: "^{{ item.variable }}"
+        line: "{{ item.variable }}={{ item.value }}"
+      loop:
+        - {
+            variable: "CANONICAL_URL",
+            value: "https://storefront.{{ domain }}",
+          }
+        - {
+            variable: "EXTERNAL_GRAPHQL_URL",
+            value: "https://api.{{ domain }}/graphql",
+          }
+        - {
+            variable: "OAUTH2_AUTH_URL",
+            value: "https://hydra.{{ domain }}/oauth2/auth",
+          }
+        - {
+            variable: "OAUTH2_IDP_HOST_URL",
+            value: "https://identity.{{ domain }}",
+          }
+        - {
+            variable: "OAUTH2_REDIRECT_URL",
+            value: "https://storefront.{{ domain }}/callback",
+          }
+        - {
+            variable: "OAUTH2_TOKEN_URL",
+            value: "https://hydra.{{ domain }}/oauth2/token",
+          }
+        - {
+            variable: "OAUTH2_PUBLIC_LOGOUT_URL",
+            value: "https://hydra.{{ domain }}/oauth2/sessions/logout",
+          }
+        - {
+            variable: "OAUTH2_IDP_PUBLIC_CHANGE_PASSWORD_URL",
+            value: "https://identity.{{ domain }}/account/change-password?email=EMAIL&from=FROM",
+          }
+
+    - name: "Set Hydra's environment variables"
+      lineinfile:
+        path: "{{ reaction_platform_path }}/reaction-hydra/.env"
+        regexp: "^{{ item.variable }}"
+        line: "{{ item.variable }}={{ item.value }}"
+      loop:
+        - {
+            variable: "URLS_CONSENT",
+            value: "https://identity.{{ domain }}/consent",
+          }
+        - {
+            variable: "URLS_SELF_ISSUER",
+            value: "https://hydra.{{ domain }}"
+          }
+        - {
+            variable: "URLS_LOGIN",
+            value: "https://identity.{{ domain }}/login",
+          }
+        - {
+            variable: "URLS_ERROR",
+            value: "https://identity.{{ domain }}/account/oauth-error",
+          }
+        - {
+            variable: "URLS_LOGOUT",
+            value: "https://identity.{{ domain }}/logout",
+          }
+        - {
+            variable: "SERVE_PUBLIC_CORS_ALLOWED_ORIGINS",
+            value: "https://admin.{{ domain }}",
+          }
+
+    - name: "Set the Reaction identity service environment variables"
+      lineinfile:
+        path: "{{ reaction_platform_path }}/reaction-identity/.env"
+        regexp: "^{{ item.variable }}"
+        line: "{{ item.variable }}={{ item.value }}"
+      loop:
+        - {
+            variable: "ROOT_URL",
+            value: "https://identity.{{ domain }}",
+          }
+        - {
+            variable: "API_URL",
+            value: "https://api.{{ domain }}/graphql",
+          }
+        - {
+            variable: "HYDRA_TOKEN_URL",
+            value: "https://hydra.{{ domain }}/oauth2/token"
+          }
+        - {
+            variable: "OAUTH2_CLIENT_DOMAINS",
+            value: "https://storefront.{{ domain }}"
+          }
+
+    - name: "Set the Reaction admin UI service environment variables"
+      lineinfile:
+        path: "{{ reaction_platform_path }}/reaction-admin/.env"
+        regexp: "^{{ item.variable }}"
+        line: "{{ item.variable }}={{ item.value }}"
+      loop:
+        - {
+            variable: "ROOT_URL",
+            value: "https://admin.{{ domain }}",
+          }
+        - {
+            variable: "PUBLIC_STOREFRONT_HOME_URL",
+            value: "https://storefront.{{ domain }}",
+          }
+        - {
+            variable: "PUBLIC_I18N_BASE_URL",
+            value: "https://api.{{ domain }}"
+          }
+        - {
+            variable: "PUBLIC_FILES_BASE_URL",
+            value: "https://api.{{ domain }}"
+          }
+        - {
+            variable: "PUBLIC_GRAPHQL_API_URL_WS",
+            value: "wss://api.{{ domain }}/graphql"
+          }
+        - {
+            variable: "PUBLIC_GRAPHQL_API_URL_HTTP",
+            value: "https://api.{{ domain }}/graphql"
+          }
+        - {
+            variable: "OAUTH2_PUBLIC_URL",
+            value: "https://hydra.{{ domain }}"
+          }
+        - {
+            variable: "OAUTH2_IDP_PUBLIC_CHANGE_PASSWORD_URL",
+            value: "https://identity.{{ domain }}/account/change-password?email=EMAIL&from=FROM"
+          }
+
+    - name: "Remove all Reaction Platform containers"
+      command: make rm
+      args:
+        chdir: "{{ reaction_platform_path }}"
+
+    - name: "Start all Reaction Platform containers"
+      command: make start
+      args:
+        chdir: "{{ reaction_platform_path }}"
+
+    - name: Download Lazydocker
+      get_url:
+        url: https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh
+        dest: /tmp
+
+    - name: Install Lazydocker
+      command: bash /tmp/install_update_linux.sh
+
+    - name: Add Docker Compose aliases
+      blockinfile:
+        path: "/home/{{ create_user }}/.bashrc"
+        block: |
+          alias dc='docker-compose'
+          # Bring all services down
+          alias dcd='docker-compose down'
+          # Attach to all logs of all services
+          alias dcl='docker-compose logs -f'
+          # Run a comand inside a running container
+          alias dcr='docker-compose run --rm'
+          # "Restart" all services
+          alias dcre='docker-compose down && docker-compose up -d && docker-compose logs -f'
+          # Bring all services up in daemon mode
+          alias dcu='docker-compose up -d'
+          # Bring all containers up and attach to their logs
+          alias dcul='docker-compose up -d && docker-compose logs -f'
+          # Remove exited containers
+          alias dprune='docker ps -aq --no-trunc -f status=exited | xargs docker rm'
+          # Show all running containers, with horizontal paging
+          alias dps='docker ps -a | less -S'
+
+    - name: "Source .bashrc"
+      shell: "source /home/{{ create_user }}/.bashrc"
+      args:
+        executable: /bin/bash
