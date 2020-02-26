@@ -17,6 +17,7 @@ This deployment guide's purpose is to provide a simple and easy guide on how to 
     - [Set Ansible Environment Variables](#set-ansible-environment-variables)
     - [Execute the Playbook](#execute-the-playbook)
     - [Create the Primary Shop](#create-the-primary-shop)
+- [Video Tutorial](#video-tutorial)
 - [Command Cheatsheet](#command-cheatsheet)
 
 ### Requirements
@@ -181,6 +182,10 @@ https://admin.example.com
 Login with default username/password: `admin@localhost` and password: `r3@cti0n`, and follow instructions to create the primary shop.
 
 Further, the `GraphQL API` explorer will be available at `https://api.example.com/graphql`.
+
+### Video Tutorial
+
+Coming soon...
 
 ### Command Cheatsheet
 
