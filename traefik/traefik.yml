@@ -1,0 +1,26 @@
+api:
+  dashboard: true
+
+entryPoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"
+
+providers:
+  providersThrottleDuration: 2s
+  docker:
+    watch: true
+    exposedByDefault: false
+
+log: {}
+
+certificatesResolvers:
+  le:
+    acme:
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+      email: YOUR_EMAIL
+      storage: acme.json
+      dnsChallenge:
+        provider: digitalocean
+        delayBeforeCheck: 0

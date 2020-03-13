@@ -7,15 +7,20 @@ networks:
 services:
   api:
     labels:
-      - 'traefik.backend=api'
-      - 'traefik.port=3000'
-      - 'traefik.frontend.rule=Host:api.example.com'
-      # Uncomment to password protect the Reaction API
-      # - 'traefik.frontend.auth.basic.removeHeader=true'
-      # - 'traefik.frontend.auth.basic=YOUR_USER:YOUR_ENCRYPTED_PASSWORD'
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.entrypoints=http"
+      - "traefik.http.routers.api.rule=Host(`api.example.com`)"
+      - "traefik.http.middlewares.api-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.api.middlewares=api-https-redirect"
+      - "traefik.http.routers.api-secure.entrypoints=https"
+      - "traefik.http.routers.api-secure.rule=Host(`api.example.com`)"
+      - "traefik.http.routers.api-secure.tls=true"
+      - "traefik.http.routers.api-secure.service=api"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
+      - "traefik.docker.network=web"
     networks:
       web:
   mongo:
     labels:
-      - traefik.enable=false
+      - "traefik.enable=false"
 

@@ -2,10 +2,13 @@ version: "3.4"
 
 services:
   traefik:
-    image: traefik:1.7.2-alpine
+    image: traefik:v2.1
+    security_opt:
+      - no-new-privileges:true
     container_name: traefik
     restart: unless-stopped
-    #command: -c /dev/null --web --docker --logLevel=DEBUG
+    # command: 
+      # --api.insecure=true --providers.docker
     networks:
       - web
       - internal
@@ -14,15 +17,26 @@ services:
       - "443:443"
     environment:
       - DO_AUTH_TOKEN=YOUR_DIGITALOCEAN_AUTH_TOKEN
-    labels:
-      - traefik.backend=traefik
-      - traefik.frontend.rule=Host:traefik.example.com
-      - traefik.docker.network=web
-      - traefik.port=8080
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /home/your_username/proxy/traefik/traefik.toml:/traefik.toml
-      - /home/your_username/proxy/traefik/acme.json:/acme.json
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /home/reaction/proxy/traefik/traefik.yml:/traefik.yml:ro
+      - /home/reaction/proxy/traefik/acme.json:/acme.jso
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=http"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.example.com`)"
+      # - "traefik.http.middlewares.traefik-auth.basicauth.users=USER:PASSWORD"
+      # - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
+      - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
+      - "traefik.http.routers.traefik-secure.entrypoints=https"
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.example.com`)"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=le"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=example.com"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.example.com"
+      - "traefik.http.routers.traefik-secure.service=api@internal"
 
 networks:
   web:

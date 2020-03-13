@@ -7,8 +7,16 @@ networks:
 services:
   reaction-admin:
     labels:
-      - 'traefik.backend=reaction-admin'
-      - 'traefik.port=4080'
-      - 'traefik.frontend.rule=Host:admin.example.com'
+      - "traefik.enable=true"
+      - "traefik.http.routers.admin.entrypoints=http"
+      - "traefik.http.routers.admin.rule=Host(`admin.example.com`)"
+      - "traefik.http.middlewares.admin-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.admin.middlewares=admin-https-redirect"
+      - "traefik.http.routers.admin-secure.entrypoints=https"
+      - "traefik.http.routers.admin-secure.rule=Host(`admin.example.com`)"
+      - "traefik.http.routers.admin-secure.tls=true"
+      - "traefik.http.routers.admin-secure.service=admin"
+      - "traefik.http.services.admin.loadbalancer.server.port=4080"
+      - "traefik.docker.network=web"
     networks:
       web:

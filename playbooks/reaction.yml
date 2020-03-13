@@ -215,7 +215,7 @@
         regexp: "your_username"
         replace: "{{ create_user }}"
 
-    - name: "Set the domain Traefik's docker-compose.yml"
+    - name: "Set the desired domain in Traefik's docker-compose.yml"
       replace:
         path: "{{ traefik_path}}/docker-compose.yml"
         regexp: "example.com"
@@ -223,7 +223,7 @@
 
     - name: "Set the email in Traefik's config file"
       replace:
-        path: "{{ traefik_path}}/traefik.toml"
+        path: "{{ traefik_path}}/traefik.yml"
         regexp: "YOUR_EMAIL"
         replace: "{{ email }}"
 
@@ -235,7 +235,7 @@
 
     - name: "Set correct permissions on traefik.toml"
       file:
-        path: "{{ traefik_path}}/traefik.toml"
+        path: "{{ traefik_path}}/traefik.yml"
         mode: "600"
 
     - name: "Set correct permissions on acme.json"

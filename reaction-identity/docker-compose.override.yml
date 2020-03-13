@@ -7,8 +7,17 @@ networks:
 services:
   identity:
     labels:
-      - 'traefik.backend=identity'
-      - 'traefik.port=4100'
-      - 'traefik.frontend.rule=Host:identity.example.com'
+      - "traefik.enable=true"
+      - "traefik.http.routers.identity.entrypoints=http"
+      - "traefik.http.routers.identity.rule=Host(`identity.example.com`)"
+      - "traefik.http.middlewares.identity-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.identity.middlewares=identity-https-redirect"
+      - "traefik.http.routers.identity-secure.entrypoints=https"
+      - "traefik.http.routers.identity-secure.rule=Host(`identity.example.com`)"
+      - "traefik.http.routers.identity-secure.tls=true"
+      - "traefik.http.routers.identity-secure.service=identity"
+      - "traefik.http.services.identity.loadbalancer.server.port=4100"
+      - "traefik.docker.network=web"
+
     networks:
       web:

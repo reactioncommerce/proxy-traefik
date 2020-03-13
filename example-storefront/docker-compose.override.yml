@@ -7,11 +7,17 @@ networks:
 services:
   web:
     labels:
-      - 'traefik.backend=web'
-      - 'traefik.port=4000'
-      - 'traefik.frontend.rule=Host:storefront.example.com'
-      # Uncomment to password protect the storefront
-      # - 'traefik.frontend.auth.basic.removeHeader=true'
-      # - 'traefik.frontend.auth.basic=YOUR_USER:YOUR_ENCRYPTED_PASSWORD'
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.entrypoints=http"
+      - "traefik.http.routers.web.rule=Host(`storefront.example.com`)"
+      - "traefik.http.middlewares.web-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.web.middlewares=web-https-redirect"
+      - "traefik.http.routers.web-secure.entrypoints=https"
+      - "traefik.http.routers.web-secure.rule=Host(`storefront.example.com`)"
+      - "traefik.http.routers.web-secure.tls=true"
+      - "traefik.http.routers.web-secure.service=web"
+      - "traefik.http.services.web.loadbalancer.server.port=4000"
+      - "traefik.docker.network=web"
+
     networks:
       web:
