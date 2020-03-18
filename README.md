@@ -30,7 +30,7 @@ This deployment guide's purpose is to provide a simple and easy guide on how to 
 - Git
 - Node
 - Yarn
-- Some familiarity with [Traefik](https://traefik.io)
+- Some familiarity with [Traefik](https://github.com/containous/traefik/)
 
 ### Reaction Platform Services Overview
 
