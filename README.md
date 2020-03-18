@@ -55,7 +55,7 @@ The [Reaction Identity](https://github.com/reactioncommerce/reaction-identity) s
 
 ## Getting Started
 
-Reaction services will be exposed to the public using [Traefik](https://traefik.io), which is a cloud native router. Traefik will act as a reverse proxy that will route traffic to Docker containers. As stated above, you will need a registered domain to complete this step, as it will be necessary to manage DNS records for it.
+Reaction services will be exposed to the public using [Traefik](https://github.com/containous/traefik/), which is a cloud native router. Traefik will act as a reverse proxy that will route traffic to Docker containers. As stated above, you will need a registered domain to complete this step, as it will be necessary to manage DNS records for it.
 
 This guide will use the following sub-domains, where `example.com` will need to be substitute it with your domain: 
 
