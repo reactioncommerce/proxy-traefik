@@ -68,7 +68,8 @@ This guide will use the following sub-domains, where `example.com` will need to 
 | identity.example.com   | The Reaction Identity service         |
 | traefik.example.com    | Traefik's admin UI                    |
 
-Each of your domains will need an `A` DNS record that resolves to your host's IP. Further, in order to obtain SSL certificates for your sub-domains, you will need a DNS manager tha supports [CAA](https://support.dnsimple.com/articles/caa-record/) records. It's recommend to use DigitalOcean's free [DNS manager](https://www.digitalocean.com/docs/networking/dns/overview/)
+Each of your domains will need an `A` DNS record that resolves to your host's IP. It's recommend to use DigitalOcean's free [DNS manager](https://www.digitalocean.com/docs/networking/dns/overview/). Further, in order to obtain SSL certificates for your sub-domains, you will need a DNS manager that supports [CAA](https://support.dnsimple.com/articles/caa-record/) records.
+
 
 Further, you will need a [DigitalOcean Auth token](https://www.digitalocean.com/docs/api/create-personal-access-token/) to generate CAA records for your sub-domains.
 
