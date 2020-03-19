@@ -180,7 +180,7 @@ To create the primary shop login into the Reaction Admin at the following URL, f
 https://admin.example.com
 ```
 
-Login with default username/password: `admin@localhost` and password: `r3@cti0n`, and follow instructions to create the primary shop.
+Upon navigating to the Reaction Admin interface, you will be presented with a login form, it will be necessary to create a user first, so click on the "Register" link and fill out the form. Once logged in, proceed to create a shop in the admin interface.
 
 Further, the `GraphQL API` explorer will be available at `https://api.example.com/graphql`.
 
