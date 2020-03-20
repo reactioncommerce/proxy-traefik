@@ -186,7 +186,7 @@ Further, the `GraphQL API` explorer will be available at `https://api.example.co
 
 ### Video Tutorial
 
-Coming soon...
+[![Deploy the Reaction Platform on DigitalOcean](docs/img/splash.png)](http://www.youtube.com/watch?v=7g5LfEVLt1U "Deploy the Reaction Platform on DigitalOcean")
 
 ### Command Cheatsheet
 
