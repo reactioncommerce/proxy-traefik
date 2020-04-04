@@ -30,7 +30,7 @@ This deployment guide's purpose is to provide a simple and easy guide on how to 
 - Git
 - Node
 - Yarn
-- Some familiarity with [Traefik](https://traefik.io)
+- Some familiarity with [Traefik](https://github.com/containous/traefik/)
 
 ### Reaction Platform Services Overview
 
@@ -55,7 +55,7 @@ The [Reaction Identity](https://github.com/reactioncommerce/reaction-identity) s
 
 ## Getting Started
 
-Reaction services will be exposed to the public using [Traefik](https://traefik.io), which is a cloud native router. Traefik will act as a reverse proxy that will route traffic to Docker containers. As stated above, you will need a registered domain to complete this step, as it will be necessary to manage DNS records for it.
+Reaction services will be exposed to the public using [Traefik](https://github.com/containous/traefik/), which is a cloud native router. Traefik will act as a reverse proxy that will route traffic to Docker containers. As stated above, you will need a registered domain to complete this step, as it will be necessary to manage DNS records for it.
 
 This guide will use the following sub-domains, where `example.com` will need to be substitute it with your domain: 
 
@@ -68,7 +68,8 @@ This guide will use the following sub-domains, where `example.com` will need to 
 | identity.example.com   | The Reaction Identity service         |
 | traefik.example.com    | Traefik's admin UI                    |
 
-Each of your domains will need an `A` DNS record that resolves to your host's IP. Further, in order to obtain SSL certificates for your sub-domains, you will need a DNS manager tha supports [CAA](https://support.dnsimple.com/articles/caa-record/) records. It's recommend to use DigitalOcean's free [DNS manager](https://www.digitalocean.com/docs/networking/dns/overview/)
+Each of your domains will need an `A` DNS record that resolves to your host's IP. It's recommend to use DigitalOcean's free [DNS manager](https://www.digitalocean.com/docs/networking/dns/overview/). Further, in order to obtain SSL certificates for your sub-domains, you will need a DNS manager that supports [CAA](https://support.dnsimple.com/articles/caa-record/) records.
+
 
 Further, you will need a [DigitalOcean Auth token](https://www.digitalocean.com/docs/api/create-personal-access-token/) to generate CAA records for your sub-domains.
 
@@ -179,13 +180,13 @@ To create the primary shop login into the Reaction Admin at the following URL, f
 https://admin.example.com
 ```
 
-Login with default username/password: `admin@localhost` and password: `r3@cti0n`, and follow instructions to create the primary shop.
+Upon navigating to the Reaction Admin interface, you will be presented with a login form, it will be necessary to create a user first, so click on the "Register" link and fill out the form. Once logged in, proceed to create a shop in the admin interface.
 
 Further, the `GraphQL API` explorer will be available at `https://api.example.com/graphql`.
 
 ### Video Tutorial
 
-Coming soon...
+[![Deploy the Reaction Platform on DigitalOcean](docs/img/splash.png)](http://www.youtube.com/watch?v=7g5LfEVLt1U "Deploy the Reaction Platform on DigitalOcean")
 
 ### Command Cheatsheet
 
