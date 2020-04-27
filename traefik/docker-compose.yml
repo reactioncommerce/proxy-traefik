@@ -2,7 +2,7 @@ version: "3.4"
 
 services:
   traefik:
-    image: traefik:v2.1
+    image: traefik:v2.2
     security_opt:
       - no-new-privileges:true
     container_name: traefik
