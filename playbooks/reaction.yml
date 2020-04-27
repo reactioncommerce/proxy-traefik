@@ -212,8 +212,8 @@
     - name: "Set config files path in Traefik's docker-compose.yml"
       replace:
         path: "{{ traefik_path}}/docker-compose.yml"
-        regexp: "your_username"
-        replace: "{{ create_user }}"
+        regexp: "TRAEFIK_PATH"
+        replace: "{{ traefik_path }}"
 
     - name: "Set the desired domain in Traefik's docker-compose.yml"
       replace:
