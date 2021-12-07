@@ -7,7 +7,6 @@ This deployment guide's purpose is to provide a simple and easy guide on how to 
 ## Table of Contents
 - [Requirements](#requirements)
 - [Reaction Services Overview](#reaction-platform-services-overview)
-- [Architecture Diagram](#architecture-diagram)
 - [Getting Started](#getting-started)
 - [Automated Server Configuration](#automated-server-configuration)
     - [Prepare the Remote Host](#prepare-the-remote-host)
@@ -43,15 +42,6 @@ The [example storefront](https://github.com/reactioncommerce/example-storefront)
 ###### Reaction Admin
 The [Reaction Admin](https://github.com/reactioncommerce/reaction-admin) service is a Meteor(currently being migrated off Meteor) application that provides the admin UI to manage products, orders etc. 
 
-###### Reaction Hydra
-The [Reaction Hydra](https://github.com/reactioncommerce/reaction-hydra) is a OAuth2 token server that is integrated with the Reaction development platform.
-
-###### Reaction Identity
-The [Reaction Identity](https://github.com/reactioncommerce/reaction-identity) service is a Meteor application that provides authentication and authorization services.
-
-### Architecture Diagram
-
-![alt text](docs/img/reaction_deployment_diagram.svg "Reaction Platform Architecture")
 
 ## Getting Started
 
@@ -64,8 +54,6 @@ This guide will use the following sub-domains, where `example.com` will need to 
 | api.example.com        | The Reaction  GraphQL API             |
 | storefront.example.com | The example storefront                |
 | admin.example.com      | The Reaction admin interface          |
-| hydra.example.com      | Hydra OAuth 2.0 server                |
-| identity.example.com   | The Reaction Identity service         |
 | traefik.example.com    | Traefik's admin UI                    |
 
 Each of your domains will need an `A` DNS record that resolves to your host's IP. It's recommend to use DigitalOcean's free [DNS manager](https://www.digitalocean.com/docs/networking/dns/overview/). Further, in order to obtain SSL certificates for your sub-domains, you will need a DNS manager that supports [CAA](https://support.dnsimple.com/articles/caa-record/) records.
