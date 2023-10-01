@@ -7,7 +7,7 @@ services:
       - no-new-privileges:true
     container_name: traefik
     restart: unless-stopped
-    # command: 
+    # command:
       # --api.insecure=true --providers.docker
     networks:
       - web
@@ -16,7 +16,7 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      - DO_AUTH_TOKEN=YOUR_DIGITALOCEAN_AUTH_TOKEN
+      - DO_AUTH_TOKEN=dop_v1_268214943d5e401fe2938500f81fc00df9195106249d28f85d8a27536d8e1975
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -25,17 +25,17 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.entrypoints=http"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.example.com`)"
-      # - "traefik.http.middlewares.traefik-auth.basicauth.users=USER:PASSWORD"
-      # - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.ashbrookit.com`)"
+
+
       - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
       - "traefik.http.routers.traefik-secure.entrypoints=https"
-      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.example.com`)"
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.ashbrookit.com`)"
       - "traefik.http.routers.traefik-secure.tls=true"
       - "traefik.http.routers.traefik-secure.tls.certresolver=le"
-      - "traefik.http.routers.traefik-secure.tls.domains[0].main=example.com"
-      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.example.com"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=ashbrookit.com"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.ashbrookit.com"
       - "traefik.http.routers.traefik-secure.service=api@internal"
 
 networks:
