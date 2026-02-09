@@ -172,10 +172,6 @@ Upon navigating to the Reaction Admin interface, you will be presented with a lo
 
 Further, the `GraphQL API` explorer will be available at `https://api.example.com/graphql`.
 
-### Video Tutorial
-
-[![Deploy the Reaction Platform on DigitalOcean](docs/img/splash.png)](http://www.youtube.com/watch?v=7g5LfEVLt1U "Deploy the Reaction Platform on DigitalOcean")
-
 ### Command Cheatsheet
 
 The following bash aliases are automatically added to the remote server for convenience.
